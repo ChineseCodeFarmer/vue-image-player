@@ -12,6 +12,7 @@
   </div>
 </template>
 <script>
+import {VelocityTracker} from "./fling.js"
 var _this;
 export default {
   name: "zoom-box",
@@ -122,12 +123,14 @@ export default {
           let lastDistance = 0;
           //处理touchEvent
           el.ontouchstart = (e) => {
+            let volTracker = new VelocityTracker();
             lastTouchCenter = _this.getTouchCenter(e.touches);
             doScale = e.touches.length >= 2;
             if (doScale) {
               lastDistance = _this.getTouchDistance(e.touches);
             }
             el.ontouchmove = (e) => {
+              volTracker.addMotionEvent(e);
               let currentTouchCenter = _this.getTouchCenter(e.touches);
               if (doScale) {
                 let currentDistance = _this.getTouchDistance(e.touches);
@@ -192,10 +195,10 @@ export default {
               return false;
             };
             el.ontouchend = (e) => {
-              if (e.touches == 0) {
+              if (e.touches.length == 0) {
                 el.ontouchmove = null;
                 el.ontouchend = null;
-                el.ontouchstart = null;
+                console.log(volTracker.getVelocityX());
               } else {
                 lastTouchCenter = _this.getTouchCenter(e.touches);
                 doScale = e.touches.length > 2;
