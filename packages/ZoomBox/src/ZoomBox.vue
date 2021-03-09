@@ -12,7 +12,7 @@
   </div>
 </template>
 <script>
-import {VelocityTracker} from "./fling.js"
+import { VelocityTracker, Scroller } from "./fling.js";
 var _this;
 export default {
   name: "zoom-box",
@@ -21,6 +21,7 @@ export default {
       scaleFactor: 1, //缩放比例
       offsetX: 0, //横向偏移
       offsetY: 0, //纵向偏移
+      flingInterval: -1,
     };
   },
   created() {
@@ -98,7 +99,39 @@ export default {
       }
       return 0;
     },
+    _startFling(velocityX, velocityY) {
+      const scroller = new Scroller();
+      let containerRect = this.$refs.zoomContainer.getBoundingClientRect();
+      const minX = containerRect.width * (1 - this.scaleFactor);
+      const maxX = 0;
+      const minY = containerRect.height * (1 - this.scaleFactor);
+      const maxY = 0;
+      const startX = _this.offsetX * this.scaleFactor;
+      const startY = _this.offsetY * this.scaleFactor;
+      scroller.fling(
+        startX,
+        startY,
+        velocityX,
+        velocityY,
+        minX,
+        maxX,
+        minY,
+        maxY
+      );
+      this.flingInterval = setInterval(() => {
+        if (!scroller.isFinished()) {
+          this.offsetX = scroller.getCurrX()/this.scaleFactor;
+          this.offsetY = scroller.getCurrY()/this.scaleFactor;
+        } else {
+          clearInterval(this.flingInterval);
+        }
+      }, 0);
+    },
+    _cancelFling() {
+      clearInterval(this.flingInterval);
+    },
   },
+
   computed: {
     transform() {
       return (
@@ -124,7 +157,9 @@ export default {
           //处理touchEvent
           el.ontouchstart = (e) => {
             let volTracker = new VelocityTracker();
+            volTracker.addMotionEvent(e);
             lastTouchCenter = _this.getTouchCenter(e.touches);
+            _this._cancelFling();
             doScale = e.touches.length >= 2;
             if (doScale) {
               lastDistance = _this.getTouchDistance(e.touches);
@@ -134,8 +169,10 @@ export default {
               let currentTouchCenter = _this.getTouchCenter(e.touches);
               if (doScale) {
                 let currentDistance = _this.getTouchDistance(e.touches);
-                let changedFactor = (currentDistance - lastDistance) / lastDistance;
-                let targetScaleFactor = currentDistance * _this.scaleFactor/lastDistance;
+                let changedFactor =
+                  (currentDistance - lastDistance) / lastDistance;
+                let targetScaleFactor =
+                  (currentDistance * _this.scaleFactor) / lastDistance;
                 lastDistance = currentDistance;
                 //限制缩放边界
                 if (targetScaleFactor < 1) {
@@ -147,8 +184,10 @@ export default {
                 let mouseX = lastTouchCenter.x - containerRect.left;
                 let mouseY = lastTouchCenter.y - containerRect.top;
                 //计算当前鼠标位置相对于原始图片的位置
-                let mouseXForOrigin = mouseX / _this.scaleFactor - _this.offsetX;
-                let mouseYForOrigin = mouseY / _this.scaleFactor - _this.offsetY;
+                let mouseXForOrigin =
+                  mouseX / _this.scaleFactor - _this.offsetX;
+                let mouseYForOrigin =
+                  mouseY / _this.scaleFactor - _this.offsetY;
                 let offsetX =
                   -(mouseXForOrigin * targetScaleFactor - mouseX) /
                   targetScaleFactor;
@@ -198,7 +237,7 @@ export default {
               if (e.touches.length == 0) {
                 el.ontouchmove = null;
                 el.ontouchend = null;
-                console.log(volTracker.getVelocityX());
+                _this._startFling(volTracker.getVelocityX(),volTracker.getVelocityY());
               } else {
                 lastTouchCenter = _this.getTouchCenter(e.touches);
                 doScale = e.touches.length > 2;
@@ -221,8 +260,12 @@ export default {
               const currentMouseX = e.pageX;
               const currentMouseY = e.pageY;
 
-              let offsetX = _this.offsetX + (currentMouseX - lastMouseX) / _this.scaleFactor;
-              let offsetY = _this.offsetY + (currentMouseY - lastMouseY) / _this.scaleFactor;
+              let offsetX =
+                _this.offsetX +
+                (currentMouseX - lastMouseX) / _this.scaleFactor;
+              let offsetY =
+                _this.offsetY +
+                (currentMouseY - lastMouseY) / _this.scaleFactor;
               lastMouseX = currentMouseX;
               lastMouseY = currentMouseY;
               let containerRect = _this.$refs.zoomContainer.getBoundingClientRect();
