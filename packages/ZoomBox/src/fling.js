@@ -10,7 +10,10 @@ export class VelocityTracker{
      */
     addMotionEvent(event){
         this.lastTouch = this.currentTouch;
-        if (event.touches.length > 0) {
+        if (event.touches.length > 0 ) {
+            if (this.lastTouch?.identifier != event.touches[0].identifier) {
+                this.lastTouch = null;
+            }
             this.currentTouch = event.touches[0];
             this.lastTime = this.currentTime;
             this.currentTime = new Date().getTime();

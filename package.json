@@ -1,6 +1,6 @@
 {
   "name": "vue-image-player",
-  "version": "1.1.4",
+  "version": "1.1.6",
   "description": "基于 Vue 的帧图片播放器(想播放视频一样播放图片)",
   "main": "lib/imageplayer.umd.min.js",
   "keyword": "imageplayer",
@@ -15,8 +15,7 @@
   "dependencies": {
     "core-js": "^3.6.5",
     "moment": "^2.29.1",
-    "vue": "^2.6.11",
-    "vue-image-player": "1.1.4"
+    "vue": "^2.6.11"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
