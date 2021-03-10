@@ -79,11 +79,7 @@ export class Scroller{
             const dTime = this._getDeltaTime();
             const currX = this._getCurrX();
             const currY = this._getCurrY();
-            this._isFinished =  Math.abs(this.velocityX) <= Math.abs(this.aX * dTime) && Math.abs(this.velocityY)  <= Math.abs(this.aY * dTime) || currX >= this.maxX || currX <= this.minX || currY >=this.maxY || currY <=this.minY;
-            if (this._isFinished) {
-                console.log(123);
-            }
-            
+            this._isFinished =  Math.abs(this.velocityX) <= Math.abs(this.aX * dTime) && Math.abs(this.velocityY)  <= Math.abs(this.aY * dTime) || currX >= this.maxX && currX <= this.minX || currY >=this.maxY && currY <=this.minY;
         }
         return this._isFinished;
     }
